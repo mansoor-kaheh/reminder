@@ -45,4 +45,3 @@ DELETE http://localhost:8080/api/v1/reminders/2
 
 ### unsupported method call
 DELETE http://localhost:8080/api/v1/reminder
-
