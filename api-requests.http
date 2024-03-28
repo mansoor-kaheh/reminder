@@ -1,0 +1,48 @@
+### Get all reminders
+GET http://localhost:8080/api/v1/reminders
+
+### create reminder
+POST http://localhost:8080/api/v1/reminders
+Content-Type: application/json
+
+{
+  "title": "Buy Milk",
+  "notes": "Buy Milk from Walmart",
+  "category": "Home",
+  "location": "Ottawa",
+  "priority": "NONE"
+}
+
+### update reminder, PUT request
+PUT http://localhost:8080/api/v1/reminders/2
+Content-Type: application/json
+
+{
+  "title": "Buy Fat Milk",
+  "notes": "Buy Fat Milk from Walmart",
+  "category": "Home",
+  "location": "Ottawa",
+  "priority": "LOW"
+}
+
+### update some parts of reminder
+PATCH http://localhost:8080/api/v1/reminders/2
+Content-Type: application/json
+
+{
+  "title": "Buy Extra Fat Milk",
+  "notes": "Buy Extra Fat Milk from Walmart"
+}
+
+### get existing reminder by id
+GET http://localhost:8080/api/v1/reminders/2
+
+### get non-existing reminder by id
+GET http://localhost:8080/api/v1/reminders/12345678
+
+### delete reminder by id
+DELETE http://localhost:8080/api/v1/reminders/2
+
+### unsupported method call
+DELETE http://localhost:8080/api/v1/reminder
+

@@ -1,13 +1,12 @@
 package com.devmantech.reminders.service;
 
 import com.devmantech.reminders.dto.ReminderDTO;
+import com.devmantech.reminders.exception.ReminderNotFoundException;
 import com.devmantech.reminders.mapper.ReminderMapper;
 import com.devmantech.reminders.model.Reminder;
 import com.devmantech.reminders.repository.ReminderRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +24,7 @@ public class ReminderService {
 
     public ReminderDTO getReminderById(Long id) {
         Reminder existingReminder = reminderRepository.findById(id)
-                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Reminder not found with id " + id));
+                .orElseThrow(() -> new ReminderNotFoundException(id));
         return reminderMapper.toDTO(existingReminder);
     }
 
@@ -38,7 +37,7 @@ public class ReminderService {
     public ReminderDTO updateReminder(Long id, ReminderDTO reminderDTO) {
         Reminder reminder = reminderMapper.toEntity(reminderDTO);
         Reminder existingReminder = reminderRepository.findById(id)
-                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Reminder not found with id " + id));
+                .orElseThrow(() -> new ReminderNotFoundException(id));
         reminder.setId(existingReminder.getId());
         Reminder updatedReminder = reminderRepository.save(reminder);
         return reminderMapper.toDTO(updatedReminder);
@@ -46,7 +45,7 @@ public class ReminderService {
 
     public ReminderDTO updateReminderPartially(Long id, ReminderDTO partialReminderDTO) {
         Reminder existingReminder = reminderRepository.findById(id)
-                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Reminder not found with id " + id));
+                .orElseThrow(() -> new ReminderNotFoundException(id));
 
         if (partialReminderDTO.getTitle() != null) {
             existingReminder.setTitle(partialReminderDTO.getTitle());
@@ -71,7 +70,7 @@ public class ReminderService {
 
     public void deleteReminder(Long id) {
         Reminder existingReminder = reminderRepository.findById(id)
-                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Reminder not found with id " + id));
+                .orElseThrow(() -> new ReminderNotFoundException(id));
         reminderRepository.delete(existingReminder);
     }
 }

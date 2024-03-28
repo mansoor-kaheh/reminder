@@ -42,7 +42,7 @@ public class ReminderController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReminder(@PathVariable Long id) {
         reminderService.deleteReminder(id);
     }
