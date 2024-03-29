@@ -12,9 +12,5 @@ public class MapperConfig {
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
-
-    @Bean
-    public ReminderMapper reminderMapper() {
-        return new ReminderMapper(modelMapper());
-    }
 }
+
