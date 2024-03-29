@@ -12,7 +12,7 @@ public class ErrorMessage {
     private final String errorCode;
     private final String errorMessage;
     private final HttpStatus httpStatus;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime timestamp;
 
     public ErrorMessage(String errorCode, String errorMessage, HttpStatus httpStatus) {

@@ -3,6 +3,7 @@ package com.devmantech.reminders.controller;
 import com.devmantech.reminders.dto.ReminderDTO;
 import com.devmantech.reminders.dto.ReminderModelAssembler;
 import com.devmantech.reminders.service.ReminderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -37,21 +38,21 @@ public class ReminderController {
     }
 
     @PostMapping
-    public ResponseEntity<EntityModel<ReminderDTO>> createReminder(@RequestBody ReminderDTO reminderDTO) {
+    public ResponseEntity<EntityModel<ReminderDTO>> createReminder(@RequestBody @Valid ReminderDTO reminderDTO) {
         EntityModel<ReminderDTO> model = reminderModelAssembler.toModel(reminderService.addReminder(reminderDTO));
         return ResponseEntity.created(model.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(model);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<ReminderDTO>> updateReminder(@PathVariable Long id, @RequestBody ReminderDTO reminderDTO) {
+    public ResponseEntity<EntityModel<ReminderDTO>> updateReminder(@PathVariable Long id, @RequestBody @Valid ReminderDTO reminderDTO) {
         EntityModel<ReminderDTO> model = reminderModelAssembler.toModel(reminderService.updateReminder(id, reminderDTO));
         return ResponseEntity.created(model.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(model);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<EntityModel<ReminderDTO>> updateReminderById(@PathVariable Long id, @RequestBody ReminderDTO reminderDTO) {
+    public ResponseEntity<EntityModel<ReminderDTO>> updateReminderById(@PathVariable Long id, @RequestBody @Valid ReminderDTO reminderDTO) {
         return ResponseEntity.ok(reminderModelAssembler.toModel(reminderService.updateReminderPartially(id, reminderDTO)));
     }
 

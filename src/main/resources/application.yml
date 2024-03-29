@@ -1,3 +1,5 @@
+reminder:
+  default-category-name: reminder
 spring:
   application:
     name: reminders
