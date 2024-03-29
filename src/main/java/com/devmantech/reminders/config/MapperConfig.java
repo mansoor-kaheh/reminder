@@ -1,6 +1,5 @@
 package com.devmantech.reminders.config;
 
-import com.devmantech.reminders.mapper.ReminderMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
