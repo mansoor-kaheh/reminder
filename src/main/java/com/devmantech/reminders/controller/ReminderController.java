@@ -52,7 +52,7 @@ public class ReminderController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<EntityModel<ReminderDTO>> updateReminderById(@PathVariable Long id, @RequestBody @Valid ReminderDTO reminderDTO) {
+    public ResponseEntity<EntityModel<ReminderDTO>> updateReminderPartially(@PathVariable Long id, @RequestBody @Valid ReminderDTO reminderDTO) {
         return ResponseEntity.ok(reminderModelAssembler.toModel(reminderService.updateReminderPartially(id, reminderDTO)));
     }
 

@@ -1,3 +1,4 @@
+DROP TABLE if exists reminder;
 CREATE TABLE reminder
 (
     id                BIGINT AUTO_INCREMENT PRIMARY KEY,
