@@ -1,6 +1,8 @@
 package com.devmantech.reminders.controller;
 
 import com.devmantech.reminders.dto.ReminderDTO;
+import com.devmantech.reminders.model.Priority;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -10,14 +12,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 
-import static org.modelmapper.internal.bytebuddy.matcher.ElementMatchers.is;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -26,6 +29,9 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 class ReminderControllerIntegrationTest {
 
     public static final String API_PATH = "/api/v1/reminders";
+    public static final String TEST_REMINDER = "Test Reminder";
+    public static final String NEW_TEST_REMINDER = "New Test Reminder";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -36,51 +42,176 @@ class ReminderControllerIntegrationTest {
     @DisplayName("Should create a Reminder via POST API")
     void shouldCreateReminder() throws Exception {
         ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setTitle("Test Reminder");
+        reminderDTO.setTitle(TEST_REMINDER);
         reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
-        String json = objectMapper.writeValueAsString(reminderDTO);
+        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(reminderJson))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
     @Test
     @DisplayName("Should receive BAD_REQUEST and not create a Reminder because of past due date")
-    void shouldNotCreateReminderWithPastDueDateTime() throws Exception {
+    void shouldReceiveBadRequestWhenCreatingReminderWithPastDueDateTime() throws Exception {
         ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setTitle("Test Reminder");
+        reminderDTO.setTitle(TEST_REMINDER);
         reminderDTO.setDueDateTime(LocalDateTime.now().minusMinutes(1));
-        String json = objectMapper.writeValueAsString(reminderDTO);
+        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(reminderJson))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
+
     @Test
     @DisplayName("Should receive BAD_REQUEST and not create a Reminder because of empty title")
-    void shouldNotCreateReminderWithEmptyTitle() throws Exception {
+    void shouldReceiveBadRequestWhenCreatingReminderWithEmptyTitle() throws Exception {
         ReminderDTO reminderDTO = new ReminderDTO();
         reminderDTO.setNotes("Test note");
-        String json = objectMapper.writeValueAsString(reminderDTO);
+        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(reminderJson))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
     @DisplayName("Should receive NOT_FOUND when GET a Reminder that not exist")
-    void shouldReceiveNotFoundWhenGetReminderThatNotExist() throws Exception {
+    void shouldReceiveNotFoundWhenGetNonExistingReminder() throws Exception {
 
-        mockMvc.perform(MockMvcRequestBuilders.get(API_PATH + "/1234567")
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.get(API_PATH + "/13572468"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    @Test
+    @DisplayName("Should update existing reminder via PUT API")
+    void shouldUpdateExistingReminder() throws Exception {
+        ReminderDTO reminderDTO = new ReminderDTO();
+        reminderDTO.setTitle(TEST_REMINDER);
+        reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reminderJson))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andReturn();
+
+        String location = mvcResult.getResponse().getHeader("Location");
+        assertNotNull(location);
+
+        String savedReminder = mvcResult.getResponse().getContentAsString();
+        String newReminderToUpdate = savedReminder.replace(TEST_REMINDER, NEW_TEST_REMINDER);
+        mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(new URI(location))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(newReminderToUpdate))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+        savedReminder = mvcResult.getResponse().getContentAsString();
+        assertTrue(savedReminder.indexOf(NEW_TEST_REMINDER) > 0);
+    }
+
+    @Test
+    @DisplayName("Should receive NOT_FOUND status when updating non-existing Reminder via PUT API")
+    void shouldReceiveNotFoundWhenUpdatingNonExistingReminder() throws Exception {
+        ReminderDTO reminderDTO = new ReminderDTO();
+        reminderDTO.setTitle(TEST_REMINDER);
+        reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.put(API_PATH + "/13572468")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reminderJson))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should partially update  existing reminder via PATCH API")
+    void shouldPartiallyUpdateExistingReminder() throws Exception {
+        //create a Reminder via POST
+        ReminderDTO reminderDTO = new ReminderDTO();
+        reminderDTO.setTitle(TEST_REMINDER);
+        reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reminderJson))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andReturn();
+
+        //get location from response
+        String location = mvcResult.getResponse().getHeader("Location");
+        assertNotNull(location);
+
+        //get id from response
+        String savedReminder = mvcResult.getResponse().getContentAsString();
+        JsonNode jsonNode = objectMapper.readTree(savedReminder);
+        Long id = jsonNode.get("id").asLong();
+
+        //construct a new reminder partially
+        ReminderDTO partialUpdateReminder = new ReminderDTO();
+        partialUpdateReminder.setId(id);
+        partialUpdateReminder.setTitle(TEST_REMINDER);
+        partialUpdateReminder.setNotes(NEW_TEST_REMINDER);
+        partialUpdateReminder.setPriority(Priority.HIGH);
+        partialUpdateReminder.setCategory("bills");
+        String newReminderToUpdate = objectMapper.writeValueAsString(partialUpdateReminder);
+        //call PATCH API
+        mvcResult = mockMvc.perform(MockMvcRequestBuilders.patch(new URI(location))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(newReminderToUpdate))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        savedReminder = mvcResult.getResponse().getContentAsString();
+        assertTrue(savedReminder.indexOf(NEW_TEST_REMINDER) > 0);
+    }
+
+    @Test
+    @DisplayName("Should receive NOT_FOUND status when updating non-existing Reminder via PATCH API")
+    void shouldReceiveNotFoundWhenPartiallyUpdatingNonExistingReminder() throws Exception {
+        ReminderDTO reminderDTO = new ReminderDTO();
+        reminderDTO.setTitle(TEST_REMINDER);
+        reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.patch(API_PATH + "/13572468")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reminderJson))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should delete existing Reminder via DELETE API")
+    void shouldDeleteExistingReminder() throws Exception {
+        ReminderDTO reminderDTO = new ReminderDTO();
+        reminderDTO.setTitle(TEST_REMINDER);
+        reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String json = objectMapper.writeValueAsString(reminderDTO);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andReturn();
+
+        String location = mvcResult.getResponse().getHeader("Location");
+        assertNotNull(location);
+        mockMvc.perform(MockMvcRequestBuilders.delete(new URI(location)))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Should receive NOT_FOUND status when deleting non-existing Reminder via DELETE API")
+    void shouldReceiveNotFoundWhenDeletingNonExistingReminder() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete(API_PATH + "/13572468"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
 
 
 }

@@ -49,7 +49,9 @@ class ReminderControllerTest {
 
         ResponseEntity<CollectionModel<EntityModel<ReminderDTO>>> responseEntity = reminderController.getAllReminders();
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(1, responseEntity.getBody().getContent().size());
+        CollectionModel<EntityModel<ReminderDTO>> body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals(1, body.getContent().size());
     }
 
     @Test
@@ -97,7 +99,7 @@ class ReminderControllerTest {
         when(reminderService.updateReminder(1L, reminderDTO)).thenReturn(reminderDTO);
 
         ResponseEntity<EntityModel<ReminderDTO>> responseEntity = reminderController.updateReminder(1L, reminderDTO);
-        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
     }
 

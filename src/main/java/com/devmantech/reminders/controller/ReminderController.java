@@ -47,8 +47,7 @@ public class ReminderController {
     @PutMapping("/{id}")
     public ResponseEntity<EntityModel<ReminderDTO>> updateReminder(@PathVariable Long id, @RequestBody @Valid ReminderDTO reminderDTO) {
         EntityModel<ReminderDTO> model = reminderModelAssembler.toModel(reminderService.updateReminder(id, reminderDTO));
-        return ResponseEntity.created(model.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(model);
+        return ResponseEntity.ok(model);
     }
 
     @PatchMapping("/{id}")

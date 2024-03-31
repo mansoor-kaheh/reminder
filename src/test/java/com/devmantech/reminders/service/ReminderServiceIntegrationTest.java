@@ -1,10 +1,8 @@
 package com.devmantech.reminders.service;
 
 import com.devmantech.reminders.dto.ReminderDTO;
-import com.devmantech.reminders.mapper.ReminderMapper;
 import com.devmantech.reminders.model.CompletionStatus;
 import com.devmantech.reminders.model.Priority;
-import com.devmantech.reminders.repository.ReminderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -26,10 +24,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("ReminderService Integration Tests")
 class ReminderServiceIntegrationTest {
 
-    @Autowired
-    private ReminderRepository reminderRepository;
-    @Autowired
-    private ReminderMapper reminderMapper;
     @Autowired
     private ReminderService reminderService;
 

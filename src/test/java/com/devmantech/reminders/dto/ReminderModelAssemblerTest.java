@@ -10,6 +10,7 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("ReminderModelAssembler Tests")
 class ReminderModelAssemblerTest {
@@ -38,13 +39,15 @@ class ReminderModelAssemblerTest {
         EntityModel<ReminderDTO> model = assembler.toModel(reminderDTO);
 
         // Assert that the model contains the correct data
-        assertEquals(1L, model.getContent().getId());
-        assertEquals("Test Reminder", model.getContent().getTitle());
-        assertEquals("Test notes", model.getContent().getNotes());
-        assertEquals("Test category", model.getContent().getCategory());
-        assertEquals("Test location", model.getContent().getLocation());
-        assertEquals(Priority.LOW, model.getContent().getPriority());
-        assertEquals(CompletionStatus.COMPLETED, model.getContent().getCompletionStatus());
+        ReminderDTO content = model.getContent();
+        assertNotNull(content);
+        assertEquals(1L, content.getId());
+        assertEquals("Test Reminder", content.getTitle());
+        assertEquals("Test notes", content.getNotes());
+        assertEquals("Test category", content.getCategory());
+        assertEquals("Test location", content.getLocation());
+        assertEquals(Priority.LOW, content.getPriority());
+        assertEquals(CompletionStatus.COMPLETED, content.getCompletionStatus());
 
         // Assert that the model contains the correct self link
         Link selfLink = model.getRequiredLink(IanaLinkRelations.SELF);
