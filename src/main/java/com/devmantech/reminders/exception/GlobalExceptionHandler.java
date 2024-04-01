@@ -2,6 +2,7 @@ package com.devmantech.reminders.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -12,5 +13,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorMessage> handleReminderNotFoundException(ReminderNotFoundException ex) {
         ErrorMessage errorMessage = new ErrorMessage("NOT_FOUND_ERROR", ex.getMessage(), HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class})
+    public ResponseEntity<ErrorMessage> handleJsonConvertException(HttpMessageNotReadableException ex) {
+        ErrorMessage errorMessage = new ErrorMessage("BAD_REQUEST_ERROR", ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     }
 }
