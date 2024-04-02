@@ -9,11 +9,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class ReminderModelAssembler implements RepresentationModelAssembler<ReminderDTO, EntityModel<ReminderDTO>> {
+public class ReminderModelAssembler implements RepresentationModelAssembler<ReminderResponse, EntityModel<ReminderResponse>> {
     @Override
-    public EntityModel<ReminderDTO> toModel(ReminderDTO reminderDTO) {
-        return EntityModel.of(reminderDTO,
-                linkTo(methodOn(ReminderController.class).getReminderById(reminderDTO.getId())).withSelfRel(),
+    public EntityModel<ReminderResponse> toModel(ReminderResponse reminderResponse) {
+        return EntityModel.of(reminderResponse,
+                linkTo(methodOn(ReminderController.class).getReminderById(reminderResponse.getId())).withSelfRel(),
                 linkTo(methodOn(ReminderController.class).getAllReminders()).withRel("reminders"));
     }
 }

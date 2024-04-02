@@ -1,6 +1,6 @@
 package com.devmantech.reminders.mapper;
 
-import com.devmantech.reminders.dto.ReminderDTO;
+import com.devmantech.reminders.dto.ReminderRequest;
 import com.devmantech.reminders.model.CompletionStatus;
 import com.devmantech.reminders.model.Priority;
 import com.devmantech.reminders.model.Reminder;
@@ -10,23 +10,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ReminderMapper {
+public class ReminderRequestMapper {
     private final ModelMapper modelMapper;
 
     @Value("${reminder.default-category-name}")
     private String defaultCategory;
 
     @Autowired
-    public ReminderMapper(ModelMapper modelMapper) {
+    public ReminderRequestMapper(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }
 
-    public ReminderDTO toDTO(Reminder reminder) {
-        return modelMapper.map(reminder, ReminderDTO.class);
+    public ReminderRequest toDTO(Reminder reminder) {
+        return modelMapper.map(reminder, ReminderRequest.class);
     }
 
-    public Reminder toEntity(ReminderDTO reminderDTO) {
-        Reminder reminder = modelMapper.map(reminderDTO, Reminder.class);
+    public Reminder toEntity(ReminderRequest reminderRequest) {
+        Reminder reminder = modelMapper.map(reminderRequest, Reminder.class);
         if (reminder.getCategory() == null || reminder.getCategory().trim().isEmpty())
             reminder.setCategory(defaultCategory);
         if (reminder.getPriority() == null)

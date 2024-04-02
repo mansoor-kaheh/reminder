@@ -1,6 +1,7 @@
 package com.devmantech.reminders.service;
 
-import com.devmantech.reminders.dto.ReminderDTO;
+import com.devmantech.reminders.dto.ReminderRequest;
+import com.devmantech.reminders.dto.ReminderResponse;
 import com.devmantech.reminders.model.CompletionStatus;
 import com.devmantech.reminders.model.Priority;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,78 +31,80 @@ class ReminderServiceIntegrationTest {
     @Value("${reminder.default-category-name}")
     private String defaultCategory;
 
-    private ReminderDTO fullReminderDTO;
-    private ReminderDTO partialReminderDTO;
+    private ReminderRequest fullReminderRequest;
+    private ReminderRequest partialReminderRequest;
 
 
     @BeforeEach
     void setUp() {
-        fullReminderDTO = createFullReminderDTO();
-        partialReminderDTO = createPartialReminderDTO();
+        fullReminderRequest = createFullReminderDTO();
+        partialReminderRequest = createPartialReminderDTO();
     }
 
     @Test
-    @DisplayName("Should return a list of all ReminderDTO")
-    void shouldReturnAllReminderDTO() {
-        List<ReminderDTO> remindersBefore = reminderService.getAllReminders();
-        reminderService.addReminder(partialReminderDTO);
-        List<ReminderDTO> remindersAfter = reminderService.getAllReminders();
+    @DisplayName("Should return a list of all ReminderResponse")
+    void shouldReturnAllReminderResponse() {
+        List<ReminderResponse> remindersBefore = reminderService.getAllReminders();
+        reminderService.addReminder(partialReminderRequest);
+        List<ReminderResponse> remindersAfter = reminderService.getAllReminders();
         assertEquals(remindersBefore.size() + 1, remindersAfter.size());
     }
 
     @Test
-    @DisplayName("Should add a complete ReminderDTO and return saved ReminderDTO")
+    @DisplayName("Should add a complete ReminderRequest and return saved ReminderResponse")
     void shouldAddCompleteReminderDtoAndReturnIt() {
-        ReminderDTO savedReminder = reminderService.addReminder(fullReminderDTO);
-        assertAfterSavingFullReminderDTO(fullReminderDTO, savedReminder);
+        ReminderResponse savedReminder = reminderService.addReminder(fullReminderRequest);
+        assertAfterSavingFullReminderDTO(fullReminderRequest, savedReminder);
     }
 
 
     @Test
-    @DisplayName("Should add a partial ReminderDTO and return saved ReminderDTO")
+    @DisplayName("Should add a partial ReminderRequest and return saved ReminderResponse")
     void shouldAddPartialReminderDtoAndReturnIt() {
-        ReminderDTO savedReminder = reminderService.addReminder(partialReminderDTO);
-        assertAfterSavingPartialReminderDTO(partialReminderDTO, savedReminder);
+        ReminderResponse savedReminder = reminderService.addReminder(partialReminderRequest);
+        assertAfterSavingPartialReminderDTO(partialReminderRequest, savedReminder);
     }
 
     @Test
-    @DisplayName("Should update ReminderDTO and return saved ReminderDTO")
+    @DisplayName("Should update ReminderRequest and return saved ReminderResponse")
     void shouldUpdateReminderDtoAndReturnIt() {
-        ReminderDTO savedReminder = reminderService.addReminder(partialReminderDTO);
-        assertAfterSavingPartialReminderDTO(partialReminderDTO, savedReminder);
+        ReminderResponse savedReminder = reminderService.addReminder(partialReminderRequest);
+        assertAfterSavingPartialReminderDTO(partialReminderRequest, savedReminder);
 
-        savedReminder.setNotes("Test notes");
-        ReminderDTO updateReminder = reminderService.updateReminder(savedReminder.getId(), savedReminder);
-        assertEquals(savedReminder.getId(), updateReminder.getId());
-        assertAfterSavingFullReminderDTO(savedReminder, updateReminder);
+        ReminderRequest reminderRequestForUpdate = getReminderRequestFromResponse(savedReminder);
+
+        ReminderResponse updatedReminder = reminderService.updateReminder(savedReminder.getId(), reminderRequestForUpdate);
+        assertEquals(savedReminder.getId(), updatedReminder.getId());
+        assertAfterSavingFullReminderDTO(reminderRequestForUpdate, updatedReminder);
     }
 
-    @Test
-    @DisplayName("Should update partial ReminderDTO and return saved ReminderDTO")
-    void shouldUpdatePartialReminderDtoAndReturnIt() {
-        ReminderDTO savedReminder = reminderService.addReminder(fullReminderDTO);
-        assertAfterSavingFullReminderDTO(fullReminderDTO, savedReminder);
 
-        ReminderDTO partialReminder = new ReminderDTO();
+    @Test
+    @DisplayName("Should update partial ReminderRequest and return saved ReminderResponse")
+    void shouldUpdatePartialReminderRequestAndReturnIt() {
+        ReminderResponse savedReminder = reminderService.addReminder(fullReminderRequest);
+        assertAfterSavingFullReminderDTO(fullReminderRequest, savedReminder);
+
+        ReminderRequest partialReminder = new ReminderRequest();
         partialReminder.setTitle(savedReminder.getTitle());
         partialReminder.setLocation("Test location");
 
-        ReminderDTO updateReminder = reminderService.updateReminderPartially(savedReminder.getId(), partialReminder);
+        ReminderResponse updateReminder = reminderService.updateReminderPartially(savedReminder.getId(), partialReminder);
 
         assertEquals(savedReminder.getId(), updateReminder.getId());
-        assertAfterSavingFullReminderDTO(savedReminder, updateReminder);
+        assertAfterSavingFullReminderDTO(fullReminderRequest, updateReminder);
     }
 
     @Test
-    @DisplayName("Should delete a ReminderDTO by id")
-    void shouldDeleteReminderDtoById() {
-        List<ReminderDTO> remindersBefore = reminderService.getAllReminders();
+    @DisplayName("Should delete a Reminder by id")
+    void shouldDeleteReminderById() {
+        List<ReminderResponse> remindersBefore = reminderService.getAllReminders();
         reminderService.deleteReminder(remindersBefore.get(0).getId());
-        List<ReminderDTO> remindersAfter = reminderService.getAllReminders();
+        List<ReminderResponse> remindersAfter = reminderService.getAllReminders();
         assertEquals(remindersBefore.size() - 1, remindersAfter.size());
     }
 
-    private void assertAfterSavingFullReminderDTO(ReminderDTO expectedReminder, ReminderDTO savedReminder) {
+    private void assertAfterSavingFullReminderDTO(ReminderRequest expectedReminder, ReminderResponse savedReminder) {
         assertNotNull(savedReminder);
         assertNotNull(savedReminder.getId());
         assertEquals(expectedReminder.getTitle(), savedReminder.getTitle());
@@ -113,7 +116,7 @@ class ReminderServiceIntegrationTest {
         assertEquals(expectedReminder.getDueDateTime(), savedReminder.getDueDateTime());
     }
 
-    private void assertAfterSavingPartialReminderDTO(ReminderDTO expectedReminder, ReminderDTO savedReminder) {
+    private void assertAfterSavingPartialReminderDTO(ReminderRequest expectedReminder, ReminderResponse savedReminder) {
         assertNotNull(savedReminder);
         assertNotNull(savedReminder.getId());
         assertEquals(expectedReminder.getTitle(), savedReminder.getTitle());
@@ -125,22 +128,34 @@ class ReminderServiceIntegrationTest {
         assertNull(savedReminder.getDueDateTime());
     }
 
-    private ReminderDTO createFullReminderDTO() {
-        ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setTitle("Test Reminder");
-        reminderDTO.setNotes("Test notes");
-        reminderDTO.setCategory("Test category");
-        reminderDTO.setLocation("Test location");
-        reminderDTO.setPriority(Priority.HIGH);
-        reminderDTO.setCompletionStatus(CompletionStatus.NOT_COMPLETE);
-        reminderDTO.setDueDateTime(LocalDateTime.now().plusMinutes(1));
-        return reminderDTO;
+    private ReminderRequest createFullReminderDTO() {
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle("Test Reminder");
+        reminderRequest.setNotes("Test notes");
+        reminderRequest.setCategory("Test category");
+        reminderRequest.setLocation("Test location");
+        reminderRequest.setPriority(Priority.HIGH);
+        reminderRequest.setCompletionStatus(CompletionStatus.NOT_COMPLETE);
+        reminderRequest.setDueDateTime(LocalDateTime.now().plusMinutes(1));
+        return reminderRequest;
     }
 
-    private ReminderDTO createPartialReminderDTO() {
-        ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setTitle("Test Reminder");
-        return reminderDTO;
+    private ReminderRequest createPartialReminderDTO() {
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle("Test Reminder");
+        return reminderRequest;
+    }
+
+    private static ReminderRequest getReminderRequestFromResponse(ReminderResponse savedReminder) {
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle(savedReminder.getTitle());
+        reminderRequest.setNotes("Test notes");
+        reminderRequest.setCategory(savedReminder.getCategory());
+        reminderRequest.setLocation(savedReminder.getLocation());
+        reminderRequest.setPriority(savedReminder.getPriority());
+        reminderRequest.setDueDateTime(savedReminder.getDueDateTime());
+        reminderRequest.setCompletionStatus(savedReminder.getCompletionStatus());
+        return reminderRequest;
     }
 
 

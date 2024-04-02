@@ -26,20 +26,20 @@ class ReminderModelAssemblerTest {
     @DisplayName("Should return a model that contains a self link")
     void shouldModelContainLinks() {
         // Mock data
-        ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setId(1L);
-        reminderDTO.setTitle("Test Reminder");
-        reminderDTO.setNotes("Test notes");
-        reminderDTO.setCategory("Test category");
-        reminderDTO.setLocation("Test location");
-        reminderDTO.setPriority(Priority.LOW);
-        reminderDTO.setCompletionStatus(CompletionStatus.COMPLETED);
+        ReminderResponse reminderResponse = new ReminderResponse();
+        reminderResponse.setId(1L);
+        reminderResponse.setTitle("Test Reminder");
+        reminderResponse.setNotes("Test notes");
+        reminderResponse.setCategory("Test category");
+        reminderResponse.setLocation("Test location");
+        reminderResponse.setPriority(Priority.LOW);
+        reminderResponse.setCompletionStatus(CompletionStatus.COMPLETED);
 
         // Call the method under test
-        EntityModel<ReminderDTO> model = assembler.toModel(reminderDTO);
+        EntityModel<ReminderResponse> model = assembler.toModel(reminderResponse);
 
         // Assert that the model contains the correct data
-        ReminderDTO content = model.getContent();
+        ReminderResponse content = model.getContent();
         assertNotNull(content);
         assertEquals(1L, content.getId());
         assertEquals("Test Reminder", content.getTitle());

@@ -1,7 +1,8 @@
 package com.devmantech.reminders.controller;
 
-import com.devmantech.reminders.dto.ReminderDTO;
 import com.devmantech.reminders.dto.ReminderModelAssembler;
+import com.devmantech.reminders.dto.ReminderRequest;
+import com.devmantech.reminders.dto.ReminderResponse;
 import com.devmantech.reminders.exception.ErrorMessage;
 import com.devmantech.reminders.service.ReminderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,8 +40,8 @@ public class ReminderController {
                     content = {@Content(mediaType = "application/hal+json")})
     })
     @GetMapping
-    public ResponseEntity<CollectionModel<EntityModel<ReminderDTO>>> getAllReminders() {
-        List<EntityModel<ReminderDTO>> reminders = reminderService.getAllReminders().stream()
+    public ResponseEntity<CollectionModel<EntityModel<ReminderResponse>>> getAllReminders() {
+        List<EntityModel<ReminderResponse>> reminders = reminderService.getAllReminders().stream()
                 .map(reminderModelAssembler::toModel).toList();
         return ResponseEntity.ok(CollectionModel.of(reminders,
                 linkTo(methodOn(ReminderController.class).getAllReminders()).withSelfRel()));
@@ -54,7 +55,7 @@ public class ReminderController {
                     content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))})
     })
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<ReminderDTO>> getReminderById(
+    public ResponseEntity<EntityModel<ReminderResponse>> getReminderById(
             @Parameter(description = "id of Reminder to be searched") @PathVariable Long id) {
         return ResponseEntity.ok(reminderModelAssembler.toModel(reminderService.getReminderById(id)));
     }
@@ -62,13 +63,13 @@ public class ReminderController {
     @Operation(summary = "Create a new Reminder")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reminder is created",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ReminderDTO.class))}),
+                    content = {@Content(mediaType = "application/hal+json")}),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))})
     })
     @PostMapping
-    public ResponseEntity<EntityModel<ReminderDTO>> createReminder(@RequestBody @Valid ReminderDTO reminderDTO) {
-        EntityModel<ReminderDTO> model = reminderModelAssembler.toModel(reminderService.addReminder(reminderDTO));
+    public ResponseEntity<EntityModel<ReminderResponse>> createReminder(@RequestBody @Valid ReminderRequest reminderRequest) {
+        EntityModel<ReminderResponse> model = reminderModelAssembler.toModel(reminderService.addReminder(reminderRequest));
         return ResponseEntity.created(model.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(model);
     }
@@ -76,34 +77,34 @@ public class ReminderController {
     @Operation(summary = "Update a Reminder by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Reminder is fully updated and returned",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ReminderDTO.class))}),
+                    content = {@Content(mediaType = "application/hal+json")}),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))}),
             @ApiResponse(responseCode = "404", description = "Reminder not found",
                     content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))})
     })
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<ReminderDTO>> updateReminder(
+    public ResponseEntity<EntityModel<ReminderResponse>> updateReminder(
             @Parameter(description = "id of Reminder to be updated") @PathVariable Long id,
-            @Parameter(description = "new Reminder object") @RequestBody @Valid ReminderDTO reminderDTO) {
-        EntityModel<ReminderDTO> model = reminderModelAssembler.toModel(reminderService.updateReminder(id, reminderDTO));
+            @Parameter(description = "new Reminder object") @RequestBody @Valid ReminderRequest reminderRequest) {
+        EntityModel<ReminderResponse> model = reminderModelAssembler.toModel(reminderService.updateReminder(id, reminderRequest));
         return ResponseEntity.ok(model);
     }
 
     @Operation(summary = "Update a Reminder partially by id. Only not-null fields are updated.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Reminder is partially updated and returned",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ReminderDTO.class))}),
+                    content = {@Content(mediaType = "application/hal+json")}),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))}),
             @ApiResponse(responseCode = "404", description = "Reminder not found",
                     content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))})
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<EntityModel<ReminderDTO>> updateReminderPartially(
+    public ResponseEntity<EntityModel<ReminderResponse>> updateReminderPartially(
             @Parameter(description = "id of Reminder to be updated") @PathVariable Long id,
-            @Parameter(description = "new Reminder object") @RequestBody @Valid ReminderDTO reminderDTO) {
-        return ResponseEntity.ok(reminderModelAssembler.toModel(reminderService.updateReminderPartially(id, reminderDTO)));
+            @Parameter(description = "new Reminder object") @RequestBody @Valid ReminderRequest reminderRequest) {
+        return ResponseEntity.ok(reminderModelAssembler.toModel(reminderService.updateReminderPartially(id, reminderRequest)));
     }
 
     @Operation(summary = "Delete a Reminder by id")

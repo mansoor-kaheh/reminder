@@ -1,8 +1,10 @@
 package com.devmantech.reminders.service;
 
-import com.devmantech.reminders.dto.ReminderDTO;
+import com.devmantech.reminders.dto.ReminderRequest;
+import com.devmantech.reminders.dto.ReminderResponse;
 import com.devmantech.reminders.exception.ReminderNotFoundException;
-import com.devmantech.reminders.mapper.ReminderMapper;
+import com.devmantech.reminders.mapper.ReminderRequestMapper;
+import com.devmantech.reminders.mapper.ReminderResponseMapper;
 import com.devmantech.reminders.model.Reminder;
 import com.devmantech.reminders.repository.ReminderRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,55 +18,56 @@ import java.util.stream.Collectors;
 public class ReminderService {
 
     private final ReminderRepository reminderRepository;
-    private final ReminderMapper reminderMapper;
+    private final ReminderRequestMapper reminderRequestMapper;
+    private final ReminderResponseMapper reminderResponseMapper;
 
-    public List<ReminderDTO> getAllReminders() {
-        return reminderRepository.findAll().stream().map(reminderMapper::toDTO).collect(Collectors.toList());
+    public List<ReminderResponse> getAllReminders() {
+        return reminderRepository.findAll().stream().map(reminderResponseMapper::toDTO).collect(Collectors.toList());
     }
 
-    public ReminderDTO getReminderById(Long id) {
+    public ReminderResponse getReminderById(Long id) {
         Reminder existingReminder = reminderRepository.findById(id)
                 .orElseThrow(() -> new ReminderNotFoundException(id));
-        return reminderMapper.toDTO(existingReminder);
+        return reminderResponseMapper.toDTO(existingReminder);
     }
 
-    public ReminderDTO addReminder(ReminderDTO reminderDTO) {
-        Reminder reminder = reminderMapper.toEntity(reminderDTO);
+    public ReminderResponse addReminder(ReminderRequest reminderRequest) {
+        Reminder reminder = reminderRequestMapper.toEntity(reminderRequest);
         Reminder savedReminder = reminderRepository.save(reminder);
-        return reminderMapper.toDTO(savedReminder);
+        return reminderResponseMapper.toDTO(savedReminder);
     }
 
-    public ReminderDTO updateReminder(Long id, ReminderDTO reminderDTO) {
-        Reminder reminder = reminderMapper.toEntity(reminderDTO);
+    public ReminderResponse updateReminder(Long id, ReminderRequest reminderRequest) {
+        Reminder reminder = reminderRequestMapper.toEntity(reminderRequest);
         Reminder existingReminder = reminderRepository.findById(id)
                 .orElseThrow(() -> new ReminderNotFoundException(id));
         reminder.setId(existingReminder.getId());
         Reminder updatedReminder = reminderRepository.save(reminder);
-        return reminderMapper.toDTO(updatedReminder);
+        return reminderResponseMapper.toDTO(updatedReminder);
     }
 
-    public ReminderDTO updateReminderPartially(Long id, ReminderDTO partialReminderDTO) {
+    public ReminderResponse updateReminderPartially(Long id, ReminderRequest partialReminderRequest) {
         Reminder existingReminder = reminderRepository.findById(id)
                 .orElseThrow(() -> new ReminderNotFoundException(id));
 
-        if (partialReminderDTO.getTitle() != null) {
-            existingReminder.setTitle(partialReminderDTO.getTitle());
+        if (partialReminderRequest.getTitle() != null) {
+            existingReminder.setTitle(partialReminderRequest.getTitle());
         }
-        if (partialReminderDTO.getNotes() != null) {
-            existingReminder.setNotes(partialReminderDTO.getNotes());
+        if (partialReminderRequest.getNotes() != null) {
+            existingReminder.setNotes(partialReminderRequest.getNotes());
         }
-        if (partialReminderDTO.getCategory() != null) {
-            existingReminder.setCategory(partialReminderDTO.getCategory());
+        if (partialReminderRequest.getCategory() != null) {
+            existingReminder.setCategory(partialReminderRequest.getCategory());
         }
-        if (partialReminderDTO.getLocation() != null) {
-            existingReminder.setLocation(partialReminderDTO.getLocation());
+        if (partialReminderRequest.getLocation() != null) {
+            existingReminder.setLocation(partialReminderRequest.getLocation());
         }
-        if (partialReminderDTO.getPriority() != null) {
-            existingReminder.setPriority(partialReminderDTO.getPriority());
+        if (partialReminderRequest.getPriority() != null) {
+            existingReminder.setPriority(partialReminderRequest.getPriority());
         }
 
         Reminder updatedReminder = reminderRepository.save(existingReminder);
-        return reminderMapper.toDTO(updatedReminder);
+        return reminderResponseMapper.toDTO(updatedReminder);
     }
 
 

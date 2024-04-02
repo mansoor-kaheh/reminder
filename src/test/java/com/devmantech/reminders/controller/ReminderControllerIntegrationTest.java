@@ -1,6 +1,6 @@
 package com.devmantech.reminders.controller;
 
-import com.devmantech.reminders.dto.ReminderDTO;
+import com.devmantech.reminders.dto.ReminderRequest;
 import com.devmantech.reminders.model.Priority;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,10 +41,10 @@ class ReminderControllerIntegrationTest {
     @Test
     @DisplayName("Should create a Reminder via POST API")
     void shouldCreateReminder() throws Exception {
-        ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setTitle(TEST_REMINDER);
-        reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
-        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle(TEST_REMINDER);
+        reminderRequest.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -55,10 +55,10 @@ class ReminderControllerIntegrationTest {
     @Test
     @DisplayName("Should receive BAD_REQUEST and not create a Reminder because of past due date")
     void shouldReceiveBadRequestWhenCreatingReminderWithPastDueDateTime() throws Exception {
-        ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setTitle(TEST_REMINDER);
-        reminderDTO.setDueDateTime(LocalDateTime.now().minusMinutes(1));
-        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle(TEST_REMINDER);
+        reminderRequest.setDueDateTime(LocalDateTime.now().minusMinutes(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -69,13 +69,27 @@ class ReminderControllerIntegrationTest {
     @Test
     @DisplayName("Should receive BAD_REQUEST and not create a Reminder because of empty title")
     void shouldReceiveBadRequestWhenCreatingReminderWithEmptyTitle() throws Exception {
-        ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setNotes("Test note");
-        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setNotes("Test note");
+        String reminderJson = objectMapper.writeValueAsString(reminderRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(reminderJson))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should receive BAD_REQUEST and not create a Reminder because of parsing error")
+    void shouldReceiveBadRequestWhenCreatingReminderWithParsingError() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\": \"Test title\",\"priority\": \"test priority\"}"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\": \"Test title\",\"dueDateTime\": \"2024-12-01T12:20:33\"}"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
@@ -90,10 +104,10 @@ class ReminderControllerIntegrationTest {
     @Test
     @DisplayName("Should update existing reminder via PUT API")
     void shouldUpdateExistingReminder() throws Exception {
-        ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setTitle(TEST_REMINDER);
-        reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
-        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle(TEST_REMINDER);
+        reminderRequest.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderRequest);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -118,10 +132,10 @@ class ReminderControllerIntegrationTest {
     @Test
     @DisplayName("Should receive NOT_FOUND status when updating non-existing Reminder via PUT API")
     void shouldReceiveNotFoundWhenUpdatingNonExistingReminder() throws Exception {
-        ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setTitle(TEST_REMINDER);
-        reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
-        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle(TEST_REMINDER);
+        reminderRequest.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.put(API_PATH + "/13572468")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -133,10 +147,10 @@ class ReminderControllerIntegrationTest {
     @DisplayName("Should partially update  existing reminder via PATCH API")
     void shouldPartiallyUpdateExistingReminder() throws Exception {
         //create a Reminder via POST
-        ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setTitle(TEST_REMINDER);
-        reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
-        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle(TEST_REMINDER);
+        reminderRequest.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderRequest);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -154,8 +168,7 @@ class ReminderControllerIntegrationTest {
         Long id = jsonNode.get("id").asLong();
 
         //construct a new reminder partially
-        ReminderDTO partialUpdateReminder = new ReminderDTO();
-        partialUpdateReminder.setId(id);
+        ReminderRequest partialUpdateReminder = new ReminderRequest();
         partialUpdateReminder.setTitle(TEST_REMINDER);
         partialUpdateReminder.setNotes(NEW_TEST_REMINDER);
         partialUpdateReminder.setPriority(Priority.HIGH);
@@ -175,10 +188,10 @@ class ReminderControllerIntegrationTest {
     @Test
     @DisplayName("Should receive NOT_FOUND status when updating non-existing Reminder via PATCH API")
     void shouldReceiveNotFoundWhenPartiallyUpdatingNonExistingReminder() throws Exception {
-        ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setTitle(TEST_REMINDER);
-        reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
-        String reminderJson = objectMapper.writeValueAsString(reminderDTO);
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle(TEST_REMINDER);
+        reminderRequest.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.patch(API_PATH + "/13572468")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -189,10 +202,10 @@ class ReminderControllerIntegrationTest {
     @Test
     @DisplayName("Should delete existing Reminder via DELETE API")
     void shouldDeleteExistingReminder() throws Exception {
-        ReminderDTO reminderDTO = new ReminderDTO();
-        reminderDTO.setTitle(TEST_REMINDER);
-        reminderDTO.setDueDateTime(LocalDateTime.now().plusHours(1));
-        String json = objectMapper.writeValueAsString(reminderDTO);
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle(TEST_REMINDER);
+        reminderRequest.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String json = objectMapper.writeValueAsString(reminderRequest);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)

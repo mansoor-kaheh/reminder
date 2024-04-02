@@ -17,11 +17,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Schema(name = "Reminder", description = "Reminder object in request and response")
-public class ReminderDTO {
+@Schema(name = "ReminderRequest", description = "Reminder object in request")
+public class ReminderRequest {
 
-    @Schema(name = "id", example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private Long id;
     @NotBlank
     @Schema(name = "title", description = "Title of reminder", minLength = 1, maxLength = 255, example = "Buy Coffee", requiredMode = Schema.RequiredMode.REQUIRED)
     private String title;
