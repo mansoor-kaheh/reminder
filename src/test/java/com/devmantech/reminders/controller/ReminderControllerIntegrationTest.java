@@ -162,11 +162,6 @@ class ReminderControllerIntegrationTest {
         String location = mvcResult.getResponse().getHeader("Location");
         assertNotNull(location);
 
-        //get id from response
-        String savedReminder = mvcResult.getResponse().getContentAsString();
-        JsonNode jsonNode = objectMapper.readTree(savedReminder);
-        Long id = jsonNode.get("id").asLong();
-
         //construct a new reminder partially
         ReminderRequest partialUpdateReminder = new ReminderRequest();
         partialUpdateReminder.setTitle(TEST_REMINDER);
@@ -181,7 +176,7 @@ class ReminderControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
-        savedReminder = mvcResult.getResponse().getContentAsString();
+        String savedReminder = mvcResult.getResponse().getContentAsString();
         assertTrue(savedReminder.indexOf(NEW_TEST_REMINDER) > 0);
     }
 
