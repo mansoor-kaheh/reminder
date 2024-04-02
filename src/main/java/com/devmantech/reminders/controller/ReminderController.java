@@ -63,7 +63,7 @@ public class ReminderController {
     @Operation(summary = "Create a new Reminder")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reminder is created",
-                    content = {@Content(mediaType = "application/hal+json")}),
+                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ReminderResponse.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))})
     })
@@ -77,7 +77,7 @@ public class ReminderController {
     @Operation(summary = "Update a Reminder by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Reminder is fully updated and returned",
-                    content = {@Content(mediaType = "application/hal+json")}),
+                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ReminderResponse.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))}),
             @ApiResponse(responseCode = "404", description = "Reminder not found",
@@ -86,7 +86,7 @@ public class ReminderController {
     @PutMapping("/{id}")
     public ResponseEntity<EntityModel<ReminderResponse>> updateReminder(
             @Parameter(description = "id of Reminder to be updated") @PathVariable Long id,
-            @Parameter(description = "new Reminder object") @RequestBody @Valid ReminderRequest reminderRequest) {
+            @Parameter @RequestBody @Valid ReminderRequest reminderRequest) {
         EntityModel<ReminderResponse> model = reminderModelAssembler.toModel(reminderService.updateReminder(id, reminderRequest));
         return ResponseEntity.ok(model);
     }
@@ -94,7 +94,7 @@ public class ReminderController {
     @Operation(summary = "Update a Reminder partially by id. Only not-null fields are updated.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Reminder is partially updated and returned",
-                    content = {@Content(mediaType = "application/hal+json")}),
+                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ReminderResponse.class))}),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))}),
             @ApiResponse(responseCode = "404", description = "Reminder not found",
@@ -103,7 +103,7 @@ public class ReminderController {
     @PatchMapping("/{id}")
     public ResponseEntity<EntityModel<ReminderResponse>> updateReminderPartially(
             @Parameter(description = "id of Reminder to be updated") @PathVariable Long id,
-            @Parameter(description = "new Reminder object") @RequestBody @Valid ReminderRequest reminderRequest) {
+            @Parameter @RequestBody @Valid ReminderRequest reminderRequest) {
         return ResponseEntity.ok(reminderModelAssembler.toModel(reminderService.updateReminderPartially(id, reminderRequest)));
     }
 
