@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,18 +22,28 @@ import java.time.LocalDateTime;
 public class ReminderRequest {
 
     @NotBlank
+    @Size(min = 1, max = 255)
     @Schema(name = "title", description = "Title of reminder", minLength = 1, maxLength = 255, example = "Buy Coffee", requiredMode = Schema.RequiredMode.REQUIRED)
     private String title;
-    @Schema(name = "notes", description = "notes about reminder", minLength = 1, maxLength = 255, example = "Buy coffee from Starbucks", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+
+    @Size(max = 255)
+    @Schema(name = "notes", description = "notes about reminder", maxLength = 255, example = "Buy coffee from Starbucks", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String notes;
-    @Schema(name = "category", description = "category of reminder", minLength = 1, maxLength = 255, example = "entertainment", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+
+    @Size(max = 255)
+    @Schema(name = "category", description = "category of reminder", maxLength = 255, example = "entertainment", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String category;
-    @Schema(description = "location of reminder", minLength = 1, maxLength = 255, example = "Starbucks", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+
+    @Size(max = 255)
+    @Schema(description = "location of reminder", maxLength = 255, example = "Starbucks", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String location;
+
     @Schema(name = "priority", description = "priority of reminder", defaultValue = "NONE", example = "LOW", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Priority priority;
+
     @Schema(name = "completionStatus", description = "completion status of reminder", defaultValue = "NOT_COMPLETE", example = "NOT_COMPLETE", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CompletionStatus completionStatus;
+
     @Future
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @Schema(name = "dueDateTime", description = "due date and time of reminder", defaultValue = "null", example = "2024-02-14 03:30", pattern = "yyyy-MM-dd HH:ss", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
