@@ -3,6 +3,7 @@ package com.devmantech.reminders.controller;
 import com.devmantech.reminders.dto.ReminderModelAssembler;
 import com.devmantech.reminders.dto.ReminderRequest;
 import com.devmantech.reminders.dto.ReminderResponse;
+import com.devmantech.reminders.exception.ActionNotAllowedException;
 import com.devmantech.reminders.exception.ReminderNotFoundException;
 import com.devmantech.reminders.model.CompletionStatus;
 import com.devmantech.reminders.model.Priority;
@@ -125,6 +126,23 @@ class ReminderControllerTest {
 
         ResponseEntity<EntityModel<ReminderResponse>> responseEntity = reminderController.updateReminderPartially(1L, reminderRequest);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should complete a Reminder and Return it")
+    void shouldCompleteReminderAndReturnIt() {
+        ReminderResponse reminderResponse = new ReminderResponse();
+        when(reminderService.completeReminder(1L)).thenReturn(reminderResponse);
+
+        ResponseEntity<EntityModel<ReminderResponse>> responseEntity = reminderController.completeReminder(1L);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when completing a completed Reminder")
+    void shouldNotCompleteACompletedReminderAndThrowException() {
+        when(reminderService.completeReminder(1L)).thenThrow(ActionNotAllowedException.class);
+        assertThrows(ActionNotAllowedException.class, () -> reminderController.completeReminder(1L));
     }
 
     @Test

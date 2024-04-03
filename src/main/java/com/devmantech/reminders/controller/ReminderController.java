@@ -107,6 +107,20 @@ public class ReminderController {
         return ResponseEntity.ok(reminderModelAssembler.toModel(reminderService.updateReminderPartially(id, reminderRequest)));
     }
 
+    @Operation(summary = "Complete the state of a Reminder")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reminder is completed",
+                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ReminderResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "Reminder not found",
+                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))}),
+            @ApiResponse(responseCode = "405", description = "Method not allowed. Reminder is already completed",
+                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))})
+    })
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<EntityModel<ReminderResponse>> completeReminder(@PathVariable Long id) {
+        return ResponseEntity.ok(reminderModelAssembler.toModel(reminderService.completeReminder(id)));
+    }
+
     @Operation(summary = "Delete a Reminder by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Reminder is deleted"),

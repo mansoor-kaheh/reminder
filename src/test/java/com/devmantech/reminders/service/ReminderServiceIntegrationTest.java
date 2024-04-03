@@ -2,6 +2,7 @@ package com.devmantech.reminders.service;
 
 import com.devmantech.reminders.dto.ReminderRequest;
 import com.devmantech.reminders.dto.ReminderResponse;
+import com.devmantech.reminders.exception.ActionNotAllowedException;
 import com.devmantech.reminders.model.CompletionStatus;
 import com.devmantech.reminders.model.Priority;
 import org.junit.jupiter.api.BeforeEach;
@@ -93,6 +94,32 @@ class ReminderServiceIntegrationTest {
 
         assertEquals(savedReminder.getId(), updateReminder.getId());
         assertAfterSavingFullReminderDTO(fullReminderRequest, updateReminder);
+    }
+
+    @Test
+    @DisplayName("Should complete ReminderRequest and return ReminderResponse")
+    void shouldCompleteReminderRequestAndReturnIt() {
+        ReminderResponse savedReminder = reminderService.addReminder(fullReminderRequest);
+        assertAfterSavingFullReminderDTO(fullReminderRequest, savedReminder);
+
+        ReminderResponse completedReminder = reminderService.completeReminder(savedReminder.getId());
+
+        assertEquals(savedReminder.getId(), completedReminder.getId());
+        assertEquals(CompletionStatus.COMPLETED, completedReminder.getCompletionStatus());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when completing a Reminder that is already complete")
+    void shouldNotCompleteACompletedReminderAndThrowException() {
+        //create a new reminder
+        ReminderResponse savedReminder = reminderService.addReminder(fullReminderRequest);
+        assertAfterSavingFullReminderDTO(fullReminderRequest, savedReminder);
+        //update reminder status to complete
+        savedReminder.setCompletionStatus(CompletionStatus.COMPLETED);
+        ReminderRequest reminderToComplete = getReminderRequestFromResponse(savedReminder);
+        reminderService.updateReminder(savedReminder.getId(), reminderToComplete);
+        //try to complete it again via complete method
+        assertThrows(ActionNotAllowedException.class, () -> reminderService.completeReminder(savedReminder.getId()));
     }
 
     @Test

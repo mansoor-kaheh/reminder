@@ -15,6 +15,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler({ActionNotAllowedException.class})
+    public ResponseEntity<ErrorMessage> handleActionNotAllowedException(ActionNotAllowedException ex) {
+        ErrorMessage errorMessage = new ErrorMessage("ACTION_NOT_ALLOWED", ex.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity<>(errorMessage, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
     @ExceptionHandler({HttpMessageNotReadableException.class})
     public ResponseEntity<ErrorMessage> handleJsonConvertException(HttpMessageNotReadableException ex) {
         ErrorMessage errorMessage = new ErrorMessage("BAD_REQUEST_ERROR", ex.getMessage(), HttpStatus.BAD_REQUEST);

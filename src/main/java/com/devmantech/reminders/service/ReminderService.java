@@ -2,9 +2,11 @@ package com.devmantech.reminders.service;
 
 import com.devmantech.reminders.dto.ReminderRequest;
 import com.devmantech.reminders.dto.ReminderResponse;
+import com.devmantech.reminders.exception.ActionNotAllowedException;
 import com.devmantech.reminders.exception.ReminderNotFoundException;
 import com.devmantech.reminders.mapper.ReminderRequestMapper;
 import com.devmantech.reminders.mapper.ReminderResponseMapper;
+import com.devmantech.reminders.model.CompletionStatus;
 import com.devmantech.reminders.model.Reminder;
 import com.devmantech.reminders.repository.ReminderRepository;
 import lombok.RequiredArgsConstructor;
@@ -70,6 +72,16 @@ public class ReminderService {
         return reminderResponseMapper.toDTO(updatedReminder);
     }
 
+    public ReminderResponse completeReminder(Long id) {
+        Reminder existingReminder = reminderRepository.findById(id)
+                .orElseThrow(() -> new ReminderNotFoundException(id));
+        if (existingReminder.getCompletionStatus() == CompletionStatus.COMPLETED) {
+            throw new ActionNotAllowedException("Complete action is not allowed. Reminder is already complete");
+        }
+        existingReminder.setCompletionStatus(CompletionStatus.COMPLETED);
+        Reminder completedReminder = reminderRepository.save(existingReminder);
+        return reminderResponseMapper.toDTO(completedReminder);
+    }
 
     public void deleteReminder(Long id) {
         Reminder existingReminder = reminderRepository.findById(id)

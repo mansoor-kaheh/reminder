@@ -5,6 +5,7 @@ import com.devmantech.reminders.dto.ReminderResponse;
 import com.devmantech.reminders.exception.ReminderNotFoundException;
 import com.devmantech.reminders.mapper.ReminderRequestMapper;
 import com.devmantech.reminders.mapper.ReminderResponseMapper;
+import com.devmantech.reminders.model.CompletionStatus;
 import com.devmantech.reminders.model.Reminder;
 import com.devmantech.reminders.repository.ReminderRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,6 +103,24 @@ class ReminderServiceTest {
         when(reminderResponseMapper.toDTO(any(Reminder.class))).thenReturn(new ReminderResponse());
 
         assertNotNull(reminderService.updateReminderPartially(1L, new ReminderRequest()));
+    }
+
+    @Test
+    @DisplayName("Should complete Reminder status")
+    void shouldCompleteReminderStatus() {
+        Reminder reminder = new Reminder();
+        reminder.setId(1L);
+        ReminderResponse reminderResponse = new ReminderResponse();
+        reminderResponse.setId(1L);
+        reminderResponse.setCompletionStatus(CompletionStatus.COMPLETED);
+
+        when(reminderRepository.findById(1L)).thenReturn(Optional.of(reminder));
+        when(reminderRepository.save(any(Reminder.class))).thenReturn(reminder);
+        when(reminderResponseMapper.toDTO(any(Reminder.class))).thenReturn(reminderResponse);
+
+        ReminderResponse completedReminder = reminderService.completeReminder(1L);
+        assertNotNull(completedReminder);
+        assertEquals(CompletionStatus.COMPLETED, completedReminder.getCompletionStatus());
     }
 
     @Test

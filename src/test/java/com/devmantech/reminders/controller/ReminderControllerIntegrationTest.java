@@ -1,7 +1,9 @@
 package com.devmantech.reminders.controller;
 
 import com.devmantech.reminders.dto.ReminderRequest;
+import com.devmantech.reminders.model.CompletionStatus;
 import com.devmantech.reminders.model.Priority;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -18,8 +20,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.net.URI;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -191,6 +192,73 @@ class ReminderControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(reminderJson))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should complete Reminder status PUT API")
+    void shouldCompleteReminder() throws Exception {
+        //create a Reminder via POST
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle(TEST_REMINDER);
+        reminderRequest.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderRequest);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reminderJson))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andReturn();
+
+        //get id from response
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        JsonNode jsonNode = objectMapper.readTree(responseBody);
+        long id = jsonNode.get("id").asLong();
+
+        //call PUT api to Complete
+        mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(API_PATH + "/" + id + "/complete"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        responseBody = mvcResult.getResponse().getContentAsString();
+        jsonNode = objectMapper.readTree(responseBody);
+        String completionStatus = jsonNode.get("completionStatus").asText();
+
+        assertEquals(CompletionStatus.COMPLETED.name(), completionStatus);
+    }
+
+    @Test
+    @DisplayName("Should complete Reminder status PUT API")
+    void shouldThrowMethodNotAllowedWhenCompletingACompletedReminder() throws Exception {
+        //create a Reminder via POST
+        ReminderRequest reminderRequest = new ReminderRequest();
+        reminderRequest.setTitle(TEST_REMINDER);
+        reminderRequest.setDueDateTime(LocalDateTime.now().plusHours(1));
+        String reminderJson = objectMapper.writeValueAsString(reminderRequest);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(API_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reminderJson))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andReturn();
+
+        //get id from response
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        JsonNode jsonNode = objectMapper.readTree(responseBody);
+        long id = jsonNode.get("id").asLong();
+
+        String savedReminder = mvcResult.getResponse().getContentAsString();
+        String newReminderToUpdate = savedReminder.replace("NOT_COMPLETE", "COMPLETED");
+        mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(API_PATH + "/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(newReminderToUpdate))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        //call PUT api to Complete
+        mockMvc.perform(MockMvcRequestBuilders.put(API_PATH + "/" + id + "/complete"))
+                .andExpect(MockMvcResultMatchers.status().isMethodNotAllowed())
+                .andReturn();
+
     }
 
     @Test
