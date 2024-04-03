@@ -248,11 +248,10 @@ class ReminderControllerIntegrationTest {
 
         String savedReminder = mvcResult.getResponse().getContentAsString();
         String newReminderToUpdate = savedReminder.replace("NOT_COMPLETE", "COMPLETED");
-        mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(API_PATH + "/" + id)
+        mockMvc.perform(MockMvcRequestBuilders.put(API_PATH + "/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(newReminderToUpdate))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
+                .andExpect(MockMvcResultMatchers.status().isOk());
 
         //call PUT api to Complete
         mockMvc.perform(MockMvcRequestBuilders.put(API_PATH + "/" + id + "/complete"))
