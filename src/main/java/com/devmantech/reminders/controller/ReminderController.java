@@ -29,16 +29,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/api/v1/reminders")
 @RequiredArgsConstructor
 @Tag(name = "Reminder APIs", description = "API services for CRUD operations on Reminders")
-public class ReminderController {
+public class ReminderController implements ReminderApi {
 
     private final ReminderService reminderService;
     private final ReminderModelAssembler reminderModelAssembler;
 
-    @Operation(summary = "Get all Reminders")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Reminders are returned",
-                    content = {@Content(mediaType = "application/hal+json")})
-    })
+    @Override
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<ReminderResponse>>> getAllReminders() {
         List<EntityModel<ReminderResponse>> reminders = reminderService.getAllReminders().stream()
@@ -47,26 +43,14 @@ public class ReminderController {
                 linkTo(methodOn(ReminderController.class).getAllReminders()).withSelfRel()));
     }
 
-    @Operation(summary = "Get a Reminder by its id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Reminder is returned",
-                    content = {@Content(mediaType = "application/hal+json")}),
-            @ApiResponse(responseCode = "404", description = "Reminder not found",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))})
-    })
+    @Override
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<ReminderResponse>> getReminderById(
             @Parameter(description = "id of Reminder to be searched") @PathVariable Long id) {
         return ResponseEntity.ok(reminderModelAssembler.toModel(reminderService.getReminderById(id)));
     }
 
-    @Operation(summary = "Create a new Reminder")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Reminder is created",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ReminderResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))})
-    })
+    @Override
     @PostMapping
     public ResponseEntity<EntityModel<ReminderResponse>> createReminder(@RequestBody @Valid ReminderRequest reminderRequest) {
         EntityModel<ReminderResponse> model = reminderModelAssembler.toModel(reminderService.addReminder(reminderRequest));
@@ -74,15 +58,7 @@ public class ReminderController {
                 .body(model);
     }
 
-    @Operation(summary = "Update a Reminder by id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Reminder is fully updated and returned",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ReminderResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))}),
-            @ApiResponse(responseCode = "404", description = "Reminder not found",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))})
-    })
+    @Override
     @PutMapping("/{id}")
     public ResponseEntity<EntityModel<ReminderResponse>> updateReminder(
             @Parameter(description = "id of Reminder to be updated") @PathVariable Long id,
@@ -91,15 +67,7 @@ public class ReminderController {
         return ResponseEntity.ok(model);
     }
 
-    @Operation(summary = "Update a Reminder partially by id. Only not-null fields are updated.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Reminder is partially updated and returned",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ReminderResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))}),
-            @ApiResponse(responseCode = "404", description = "Reminder not found",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))})
-    })
+    @Override
     @PatchMapping("/{id}")
     public ResponseEntity<EntityModel<ReminderResponse>> updateReminderPartially(
             @Parameter(description = "id of Reminder to be updated") @PathVariable Long id,
@@ -107,26 +75,13 @@ public class ReminderController {
         return ResponseEntity.ok(reminderModelAssembler.toModel(reminderService.updateReminderPartially(id, reminderRequest)));
     }
 
-    @Operation(summary = "Complete the state of a Reminder")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Reminder is completed",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ReminderResponse.class))}),
-            @ApiResponse(responseCode = "404", description = "Reminder not found",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))}),
-            @ApiResponse(responseCode = "405", description = "Method not allowed. Reminder is already completed",
-                    content = {@Content(mediaType = "application/hal+json", schema = @Schema(implementation = ErrorMessage.class))})
-    })
+    @Override
     @PutMapping("/{id}/complete")
     public ResponseEntity<EntityModel<ReminderResponse>> completeReminder(@PathVariable Long id) {
         return ResponseEntity.ok(reminderModelAssembler.toModel(reminderService.completeReminder(id)));
     }
 
-    @Operation(summary = "Delete a Reminder by id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Reminder is deleted"),
-            @ApiResponse(responseCode = "404", description = "Reminder not found",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))})
-    })
+    @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteReminder(
             @Parameter(description = "id of Reminder to be deleted") @PathVariable Long id) {
